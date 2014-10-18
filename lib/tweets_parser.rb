@@ -30,6 +30,8 @@ class TweetsParser
     sentence.gsub!("-", " ")
     sentence.gsub!(" ,", ",")
     sentence.gsub!("\"", "")
+    sentence.gsub!(/\,+$/, '')
+    sentence.gsub!("\"", "")
     sentence.strip
   end
 
@@ -40,15 +42,6 @@ class TweetsParser
       sentences << line.split(/[.?!]/).map{ |sentence| sanitize_sentence(sentence.strip) }.reject{|a| a.strip == "" }
     end
     sentences.flatten
-  end
-
-  #totally experimental lol
-  def count_syllables(input)
-    return 1 if input.length <= 3
-    input.downcase!
-    input.sub!(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '')
-    input.sub!(/^y/, '')
-    input.scan(/[aeiouy]{1,2}/).size
   end
 
   def get_latest_sentences(handle)
