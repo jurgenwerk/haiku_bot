@@ -8,9 +8,13 @@ require 'extensions'
 module Clockwork
 
   every(30.minutes, "[#{DateTime.now.to_s}] Fetching and saving sentences from tweets", thread: true) do
-    handles = get_fetch_client.friends.map(&:screen_name).shuffle.first(15)
-    handles.each do |handle|
-      save_tweets(get_parser.get_latest_sentences(handle))
+    begin
+      handles = get_fetch_client.friends.map(&:screen_name).shuffle.first(15)
+      handles.each do |handle|
+        save_tweets(get_parser.get_latest_sentences(handle))
+      end
+    rescue
+      puts "fail while saving tweets"
     end
   end
 
