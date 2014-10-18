@@ -3,6 +3,7 @@ require './config/environment'
 require 'clockwork'
 require 'twitter'
 require 'tweets_parser'
+require 'extensions'
 
 module Clockwork
 
