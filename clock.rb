@@ -7,25 +7,43 @@ require 'extensions'
 
 module Clockwork
 
-  every(30.minutes, "[#{DateTime.now.to_s}] Fetching and saving sentences from tweets") do
-    # handles = get_fetch_client.friends.map(&:screen_name).shuffle.first(15)
-    # handles.each do |handle|
-    #   save_tweets(get_parser.get_latest_sentences(handle))
-    # end
+  every(30.minutes, "[#{DateTime.now.to_s}] Fetching and saving sentences from tweets", thread: true) do
+    handles = get_fetch_client.friends.map(&:screen_name).shuffle.first(15)
+    handles.each do |handle|
+      save_tweets(get_parser.get_latest_sentences(handle))
+    end
   end
 
-  every(1.day, "[#{DateTime.now.to_s}] Deleting tweets older than one day") do
-    # Tweet.where(:created_at.lte => (Date.today-1)).destroy_all
+  every(1.day, "[#{DateTime.now.to_s}] Deleting old tweets") do
+    Tweet.where(:created_at.lte => (DateTime.current - 1.day)).destroy_all
   end
 
-  every(30.seconds, "[#{DateTime.now.to_s}] Saving Haiku candidates") do
-    # puts generate_haiku_candidate
+  every(1.day, "[#{DateTime.now.to_s}] Deleting old published Haikus") do
+    Haiku.where(published: true, :created_at.lte => (DateTime.current - 5.day)).destroy_all
+  end
+
+  every(5.minutes, "[#{DateTime.now.to_s}] Saving a new Haiku candidate") do
+    haiku = generate_haiku_candidate
+    Haiku.create(text: haiku) if haiku.present?
+    puts "Saved haiku candidate #{haiku}"
+  end
+
+  every(10.minutes, "[#{DateTime.now.to_s}] Publishing Haiku candidates") do
+    haiku = Haiku.where(for_publishing: true, published: false).first
+    if haiku.present?
+      client = get_post_client
+      client.update(haiku)
+      haiku.published = true
+      haiku.save
+    end
   end
 
   class << self
 
+    #todo move this stuff into separate class and extract persistence layer from it.
+
     def generate_haiku_candidate
-      tweets = Tweet.all.desc('_id').limit(3000)
+      tweets = Tweet.where(used: false).all.desc('_id').limit(3000)
       verse1 = get_verse(tweets, 5)
       verse2 = get_verse(tweets, 7)
       verse3 = get_verse(tweets, 5)
@@ -34,6 +52,10 @@ module Clockwork
       handle2 = verse2[0].handle
       handle3 = verse3[0].handle
 
+      handles = [handle1, handle2, handle3].uniq.map{|handle| "@#{handle}"}.join(" ")
+
+      mark_tweets_as_used!([verse1[0], verse2[0], verse3[0]])
+
       tweet = ""
       tweet.concat(verse1[1])
       tweet.concat("\n")
@@ -41,7 +63,14 @@ module Clockwork
       tweet.concat("\n")
       tweet.concat(verse3[1])
       tweet.concat("\n")
-      tweet.concat("#haiku from @#{handle1} @#{handle2} @#{handle3}")
+      tweet.concat("#haiku from #{handles}")
+    end
+
+    def mark_tweets_as_used!(tweets)
+      tweets.each do |tweet|
+        tweet.used = true
+        tweet.save
+      end
     end
 
     def get_verse(tweets, n)
