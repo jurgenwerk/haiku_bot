@@ -18,6 +18,8 @@ module Clockwork
     end
   end
 
+  #todo only fetch from humans
+
   every(1.day, "[#{DateTime.now.to_s}] Deleting old tweets") do
     Tweet.where(:created_at.lte => (DateTime.current - 1.day)).destroy_all
   end
@@ -26,8 +28,9 @@ module Clockwork
     Haiku.where(published: true, :created_at.lte => (DateTime.current - 5.day)).destroy_all
   end
 
-  every(5.minutes, "[#{DateTime.now.to_s}] Saving a new Haiku candidate") do
-    haiku = generate_haiku_candidate
+  every(10.minutes, "[#{DateTime.now.to_s}] Saving a new Haiku candidate") do
+    tweets = Tweet.where(used: false).all.desc('_id').limit(3000).shuffle
+    haiku = generate_haiku_candidate(tweets)
     Haiku.create(text: haiku) if haiku.present?
     puts "Saved haiku candidate #{haiku}"
   end
@@ -36,7 +39,7 @@ module Clockwork
     haiku = Haiku.where(for_publishing: true, published: false).first
     if haiku.present?
       client = get_post_client
-      client.update(haiku)
+      client.update(haiku.text)
       haiku.published = true
       haiku.save
     end
@@ -46,8 +49,7 @@ module Clockwork
 
     #todo move this stuff into separate class and extract persistence layer from it.
 
-    def generate_haiku_candidate
-      tweets = Tweet.where(used: false).all.desc('_id').limit(3000)
+    def generate_haiku_candidate(tweets)
       verse1 = get_verse(tweets, 5)
       verse2 = get_verse(tweets, 7)
       verse3 = get_verse(tweets, 5)
