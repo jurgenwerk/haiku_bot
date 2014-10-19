@@ -31,8 +31,10 @@ module Clockwork
   every(5.minutes, "[#{DateTime.now.to_s}] Saving a new Haiku candidate") do
     tweets = Tweet.where(used: false).all.desc('_id').limit(3000).shuffle
     haiku = generate_haiku_candidate(tweets)
-    h = Haiku.create(text: haiku) if haiku.present?
-    puts "Saved haiku candidate \n #{h.text} \n #{h.id}"
+    if haiku.present?
+      h = Haiku.create(text: haiku)
+      puts "Saved haiku candidate \n #{h.text} \n #{h.id}"
+    end
   end
 
   every(10.minutes, "[#{DateTime.now.to_s}] Publishing Haiku candidates") do
