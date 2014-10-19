@@ -13,8 +13,8 @@ module Clockwork
       handles.each do |handle|
         save_tweets(get_parser.get_latest_sentences(handle))
       end
-    rescue
-      puts "fail while saving tweets"
+    rescue Exception => e
+      puts e.message
     end
   end
 
