@@ -7,7 +7,7 @@ require 'extensions'
 
 module Clockwork
 
-  every(30.minutes, "[#{DateTime.now.to_s}] Fetching and saving sentences from tweets", thread: true) do
+  every(2.hours, "[#{DateTime.now.to_s}] Fetching and saving sentences from tweets", thread: true) do
     begin
       handles = get_fetch_client.friends.map(&:screen_name).shuffle.first(15)
       handles.each do |handle|
