@@ -37,7 +37,7 @@ module Clockwork
     end
   end
 
-  every(10.minutes, "[#{DateTime.now.to_s}] Publishing Haiku candidates") do
+  every(10.minutes, "[#{DateTime.now.to_s}] Publishing Haiku candidates", thread: true) do
     haiku = Haiku.where(for_publishing: true, published: false).first
     if haiku.present?
       client = get_post_client
