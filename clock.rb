@@ -7,7 +7,7 @@ require 'extensions'
 
 module Clockwork
 
-  every(2.hours, "[#{DateTime.now.to_s}] Fetching and saving sentences from tweets", thread: true) do
+  every(4.hours, "[#{DateTime.now.to_s}] Fetching and saving sentences from tweets", thread: true) do
     begin
       handles = get_fetch_client.friends.map(&:screen_name).shuffle.first(15)
       handles.each do |handle|
@@ -17,8 +17,6 @@ module Clockwork
       puts e.message
     end
   end
-
-  #todo only fetch from humans
 
   every(1.day, "[#{DateTime.now.to_s}] Deleting old tweets") do
     Tweet.where(:created_at.lte => (DateTime.current - 1.day)).destroy_all
