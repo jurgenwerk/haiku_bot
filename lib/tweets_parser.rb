@@ -48,6 +48,11 @@ class TweetsParser
     sanitized_tweets = fetch_latest_tweets(handle)
     sentences = []
     sanitized_tweets.each do |tweet|
+      begin
+        lang = tweet[:text].lang
+      rescue
+        raise "lang api error"
+      end
       if tweet[:text].lang == "en"
         sentences << { tweet_id: tweet[:id], handle: tweet[:handle], sentences: extract_sentences(tweet[:text]) }
       end
