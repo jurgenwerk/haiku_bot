@@ -14,34 +14,55 @@ module Clockwork
         save_tweets(get_parser.get_latest_sentences(handle))
       end
     rescue Exception => e
+      puts "Fail while fetching tweets and saving sentences"
       puts e.message
     end
   end
 
   every(1.day, "[#{DateTime.now.to_s}] Deleting old tweets") do
-    Tweet.where(:created_at.lte => (DateTime.current - 1.day)).destroy_all
+    begin
+      Tweet.where(:created_at.lte => (DateTime.current - 1.day)).destroy_all
+    rescue Exception => e
+      puts "Fail while deleting old tweets"
+      puts e.message
+    end
   end
 
   every(1.day, "[#{DateTime.now.to_s}] Deleting old published Haikus") do
-    Haiku.where(published: true, :created_at.lte => (DateTime.current - 5.day)).destroy_all
+    begin
+      Haiku.where(published: true, :created_at.lte => (DateTime.current - 5.day)).destroy_all
+    rescue Exception => e
+      puts "Fail while deleting old published tweets"
+      puts e.message
+    end
   end
 
   every(5.minutes, "[#{DateTime.now.to_s}] Saving a new Haiku candidate") do
-    tweets = Tweet.where(used: false).all.desc('_id').limit(3000).shuffle
-    haiku = generate_haiku_candidate(tweets)
-    if haiku.present?
-      h = Haiku.create(text: haiku)
-      puts "Saved haiku candidate \n #{h.text} \n #{h.id}"
+    begin
+      tweets = Tweet.where(used: false).all.desc('_id').limit(3000).shuffle
+      haiku = generate_haiku_candidate(tweets)
+      if haiku.present?
+        h = Haiku.create(text: haiku)
+        puts "Saved haiku candidate \n #{h.text} \n #{h.id}"
+      end
+    rescue Exception => e
+      puts "Fail while saving new haiku candidates"
+      puts e.message
     end
   end
 
   every(10.minutes, "[#{DateTime.now.to_s}] Publishing Haiku candidates", thread: true) do
-    haiku = Haiku.where(for_publishing: true, published: false).first
-    if haiku.present?
-      client = get_post_client
-      client.update(haiku.text)
-      haiku.published = true
-      haiku.save
+    begin
+      haiku = Haiku.where(for_publishing: true, published: false).first
+      if haiku.present?
+        client = get_post_client
+        client.update(haiku.text)
+        haiku.published = true
+        haiku.save
+      end
+    rescue Exception => e
+      puts "Fail while publishung Haiku candidates"
+      puts e.message
     end
   end
 
