@@ -7,6 +7,6 @@ gem 'dotenv-rails'
 gem 'clockwork'
 gem 'wtf_lang'
 gem 'twitter'
-
+gem 'haml-rails'
 gem 'spring', :group => :development
 gem 'pry', :group => :development
