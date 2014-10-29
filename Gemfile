@@ -10,3 +10,6 @@ gem 'twitter'
 gem 'haml-rails'
 gem 'spring', :group => :development
 gem 'pry', :group => :development
+gem 'sprockets-rails', :require => 'sprockets/railtie'
+gem 'jquery-rails'
+gem 'coffee-rails'

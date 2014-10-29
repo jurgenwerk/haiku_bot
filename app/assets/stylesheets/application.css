@@ -13,3 +13,7 @@
  *= require_tree .
  *= require_self
  */
+
+.haiku {
+  margin: 10px;
+}

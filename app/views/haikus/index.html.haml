@@ -1,2 +1,7 @@
-- @haikus.each do |haiku|
-  = haiku.text
+.haikus
+  - @haikus.each do |haiku|
+    .haiku
+      = haiku.text.gsub("\n", "<br>").html_safe
+      .publish
+        %a{href: "#", data: { id: haiku.id }, class: "action-publish"}
+          Publish
