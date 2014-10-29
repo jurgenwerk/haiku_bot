@@ -114,10 +114,12 @@ module Clockwork
     end
 
     def try_verse(sentence, n)
-      words = sentence.split(" ")
-      0.upto(words.length) do |i|
-        verse = words[0..i].join(" ")
-        return get_parser.sanitize_sentence(verse) if verse.count_syllables == n
+      if sentence
+        words = sentence.split(" ")
+        0.upto(words.length) do |i|
+          verse = words[0..i].join(" ")
+          return get_parser.sanitize_sentence(verse) if verse.count_syllables == n
+        end
       end
       nil
     end
