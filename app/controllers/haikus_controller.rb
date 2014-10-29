@@ -1,7 +1,7 @@
 class HaikusController < ApplicationController
 
   def index
-    @haikus = Haiku.where(published: false, for_publishing: false, :created_at.gte => (DateTime.current - 1.day)).limit(50).reverse
+    @haikus = Haiku.where(published: false, for_publishing: false, :created_at.gte => (DateTime.current - 1.day)).limit(50).to_a.reverse.take(100)
   end
 
   def update
