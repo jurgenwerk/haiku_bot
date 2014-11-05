@@ -7,7 +7,7 @@ require 'extensions'
 
 module Clockwork
 
-  every(4.hours, "[#{DateTime.now.to_s}] Fetching and saving sentences from tweets", thread: true) do
+  every(4.hours, "[#{DateTime.now.to_s}] Fetching and saving sentences from tweets") do
     begin
       handles = get_fetch_client.friends.map(&:screen_name).shuffle.first(15)
       handles.each do |handle|
@@ -51,7 +51,7 @@ module Clockwork
     end
   end
 
-  every(30.minutes, "[#{DateTime.now.to_s}] Publishing Haiku candidates", thread: true) do
+  every(30.minutes, "[#{DateTime.now.to_s}] Publishing Haiku candidates") do
     begin
       haiku = Haiku.where(for_publishing: true, published: false).first
       if haiku.present?
