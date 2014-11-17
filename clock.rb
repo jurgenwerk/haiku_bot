@@ -41,7 +41,7 @@ module Clockwork
     begin
       tweets = Tweet.where(used: false).all.desc('_id').limit(3000).shuffle
       haiku = generate_haiku_candidate(tweets)
-      if haiku.present?
+      if haiku.present? && haiku.length <= 140
         h = Haiku.create(text: haiku)
         puts "Saved haiku candidate \n #{h.text} \n #{h.id}"
       end
@@ -51,9 +51,9 @@ module Clockwork
     end
   end
 
-  every(30.minutes, "[#{DateTime.now.to_s}] Publishing Haiku candidates") do
+  every(20.minutes, "[#{DateTime.now.to_s}] Publishing Haiku candidates") do
     begin
-      haiku = Haiku.where(for_publishing: true, published: false).first
+      haiku = Haiku.where(for_publishing: true, published: false).sample
       if haiku.present?
         client = get_post_client
         client.update(haiku.text)
@@ -61,7 +61,7 @@ module Clockwork
         haiku.save
       end
     rescue Exception => e
-      puts "Fail while publishung Haiku candidates"
+      puts "Fail while publishing Haiku candidates"
       puts e.message
     end
   end
