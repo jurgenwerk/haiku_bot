@@ -3,13 +3,14 @@ require './config/environment'
 require 'clockwork'
 require 'twitter'
 require 'tweets_parser'
+require 'constants'
 require 'extensions'
 
 module Clockwork
 
   every(4.hours, "[#{DateTime.now.to_s}] Fetching and saving sentences from tweets") do
     begin
-      handles = get_fetch_client.friends.map(&:screen_name).shuffle.first(15)
+      handles = Constants::HANDLES.shuffle.first(20)
       handles.each do |handle|
         save_tweets(get_parser.get_latest_sentences(handle))
       end
