@@ -56,7 +56,7 @@ module Clockwork
     begin
       haiku = Haiku.where(for_publishing: true, published: false).sample
       if haiku.present?
-        client = get_post_client
+        client = get_client
         client.update(haiku.text)
         haiku.published = true
         haiku.save
@@ -134,16 +134,7 @@ module Clockwork
       end
     end
 
-    def get_fetch_client
-      @fetch_client ||= Twitter::REST::Client.new do |config|
-        config.consumer_key = ENV["TWITTER_CONSUMER_KEY"]
-        config.consumer_secret = ENV["TWITTER_CONSUMER_SECRET"]
-        config.access_token = ENV["TWITTER_ACCESS_TOKEN"]
-        config.access_token_secret = ENV["TWITTER_ACCESS_TOKEN_SECRET"]
-      end
-    end
-
-    def get_post_client
+    def get_client
       @post_client ||= Twitter::REST::Client.new do |config|
         config.consumer_key = ENV["BOT_TWITTER_CONSUMER_KEY"]
         config.consumer_secret = ENV["BOT_TWITTER_CONSUMER_SECRET"]
@@ -153,7 +144,7 @@ module Clockwork
     end
 
     def get_parser
-      @parser ||= TweetsParser.new(get_fetch_client)
+      @parser ||= TweetsParser.new(get_client)
     end
   end
 end
